@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>తెలుగు బైబిల్</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Telugu:wght@400;600;700&family=Noto+Sans+Telugu:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #181c27;
+      --card:      #1e2333;
+      --border:    #2a3050;
+      --gold:      #c9a84c;
+      --gold-dim:  #8a6c2a;
+      --text:      #e8e2d4;
+      --muted:     #8890a8;
+      --verse-hl:  #c9a84c22;
+      --radius:    10px;
+    }
+
+    body {
+      font-family: 'Noto Sans Telugu', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Noto Serif Telugu', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .logo span { color: var(--text); font-weight: 400; }
+    .search-bar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 12px;
+      gap: 8px;
+      max-width: 420px;
+    }
+    .search-bar svg { color: var(--muted); flex-shrink: 0; }
+    .search-bar input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Noto Sans Telugu', sans-serif;
+      font-size: 0.9rem;
+      padding: 8px 0;
+      width: 100%;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+
+    /* LAYOUT */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 57px);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      min-width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Noto Sans Telugu', sans-serif;
+      font-size: 0.8rem;
+      padding: 10px 4px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 8px; }
+    .sidebar-content::-webkit-scrollbar { width: 4px; }
+    .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .testament-label {
+      font-size: 0.7rem;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 10px 6px 4px;
+      font-weight: 600;
+    }
+    .book-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: 'Noto Sans Telugu', sans-serif;
+      font-size: 0.85rem;
+      padding: 7px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .book-btn:hover { background: var(--card); }
+    .book-btn.active { background: var(--gold-dim)33; color: var(--gold); }
+
+    /* CHAPTER PICKER */
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+      gap: 6px;
+      padding: 12px 8px;
+    }
+    .ch-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.78rem;
+      padding: 6px 2px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Noto Sans Telugu', sans-serif;
+    }
+    .ch-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .ch-btn.active { background: var(--gold); color: #0f1117; border-color: var(--gold); font-weight: 600; }
+
+    /* READER */
+    .reader {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 40px;
+    }
+    .reader::-webkit-scrollbar { width: 5px; }
+    .reader::-webkit-scrollbar-track { background: transparent; }
+    .reader::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .reader-header {
+      margin-bottom: 28px;
+    }
+    .reader-header h1 {
+      font-family: 'Noto Serif Telugu', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .reader-header p {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .chapter-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .nav-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: 'Noto Sans Telugu', sans-serif;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+    .nav-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .verse-list { display: flex; flex-direction: column; gap: 2px; }
+    .verse {
+      display: flex;
+      gap: 14px;
+      padding: 10px 12px;
+      border-radius: 7px;
+      transition: background 0.15s;
+      cursor: pointer;
+      line-height: 1.9;
+    }
+    .verse:hover { background: var(--verse-hl); }
+    .verse.bookmarked { background: var(--gold-dim)22; border-left: 2px solid var(--gold); }
+    .verse-num {
+      color: var(--gold-dim);
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 22px;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .verse-text {
+      font-family: 'Noto Serif Telugu', serif;
+      font-size: 1.05rem;
+      color: var(--text);
+      flex: 1;
+    }
+    .verse-actions {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .verse:hover .verse-actions { opacity: 1; }
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      transition: color 0.15s;
+    }
+    .action-btn:hover { color: var(--gold); }
+
+    /* BOOKMARKS TAB */
+    .bookmark-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .bookmark-ref {
+      font-size: 0.75rem;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .bookmark-text {
+      font-family: 'Noto Serif Telugu', serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 32px 16px;
+      line-height: 1.8;
+    }
+
+    /* DAILY VERSE BANNER */
+    .daily-verse-banner {
+      background: linear-gradient(135deg, #1a1f35 0%, #1e2545 100%);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .daily-label {
+      font-size: 0.7rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+    .daily-text {
+      font-family: 'Noto Serif Telugu', serif;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.9;
+      margin-bottom: 8px;
+    }
+    .daily-ref {
+      font-size: 0.8rem;
+      color: var(--gold-dim);
+    }
+
+    /* SEARCH RESULTS */
+    .search-results { padding: 0; }
+    .search-result-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .search-result-item:hover { border-color: var(--gold-dim); }
+    .sr-ref { font-size: 0.75rem; color: var(--gold); margin-bottom: 5px; }
+    .sr-text { font-family: 'Noto Serif Telugu', serif; font-size: 0.92rem; line-height: 1.8; }
+    .sr-text mark { background: var(--gold-dim)55; color: var(--gold); border-radius: 2px; padding: 0 2px; }
+
+    /* LOADING */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+      padding: 60px 20px; color: var(--muted);
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--card); border: 1px solid var(--gold-dim);
+      color: var(--text); padding: 10px 18px;
+      border-radius: 8px; font-size: 0.85rem;
+      opacity: 0; transform: translateY(8px);
+      transition: all 0.25s; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 600px) {
+      .sidebar { width: 200px; min-width: 180px; }
+      .reader { padding: 20px 16px; }
+      .reader-header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✦ తెలుగు <span>బైబిల్</span></div>
+  <div class="search-bar">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="వాక్యం వెతకండి..." />
+  </div>
+</header>
+
+<div class="app-body">
+  <aside class="sidebar">
+    <div class="sidebar-tabs">
+      <button class="tab-btn active" onclick="showTab('books')">పుస్తకాలు</button>
+      <button class="tab-btn" onclick="showTab('chapters')">అధ్యాయాలు</button>
+      <button class="tab-btn" onclick="showTab('bookmarks')">బుక్‌మార్క్స్</button>
+    </div>
+    <div class="sidebar-content" id="sidebarContent"></div>
+  </aside>
+
+  <main class="reader" id="reader"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Telugu Bible Data (sample – real API loaded on demand) ──────────────────
+const BOOKS = {
+  ot: [
+    { id:'GEN', name:'ఆదికాండము', chapters:50 },
+    { id:'EXO', name:'నిర్గమకాండము', chapters:40 },
+    { id:'LEV', name:'లేవీయకాండము', chapters:27 },
+    { id:'NUM', name:'సంఖ్యాకాండము', chapters:36 },
+    { id:'DEU', name:'ద్వితీయోపదేశకాండము', chapters:34 },
+    { id:'JOS', name:'యెహోషువ', chapters:24 },
+    { id:'JDG', name:'న్యాయాధిపతులు', chapters:21 },
+    { id:'RUT', name:'రూతు', chapters:4 },
+    { id:'1SA', name:'1 సమూయేలు', chapters:31 },
+    { id:'2SA', name:'2 సమూయేలు', chapters:24 },
+    { id:'1KI', name:'1 రాజులు', chapters:22 },
+    { id:'2KI', name:'2 రాజులు', chapters:25 },
+    { id:'1CH', name:'1 దినవృత్తాంతములు', chapters:29 },
+    { id:'2CH', name:'2 దినవృత్తాంతములు', chapters:36 },
+    { id:'EZR', name:'ఎజ్రా', chapters:10 },
+    { id:'NEH', name:'నెహెమ్యా', chapters:13 },
+    { id:'EST', name:'ఎస్తేరు', chapters:10 },
+    { id:'JOB', name:'యోబు', chapters:42 },
+    { id:'PSA', name:'కీర్తనలు', chapters:150 },
+    { id:'PRO', name:'సామెతలు', chapters:31 },
+    { id:'ECC', name:'ప్రసంగి', chapters:12 },
+    { id:'SNG', name:'పరమగీతము', chapters:8 },
+    { id:'ISA', name:'యెషయా', chapters:66 },
+    { id:'JER', name:'యిర్మీయా', chapters:52 },
+    { id:'LAM', name:'విలాపవాక్యములు', chapters:5 },
+    { id:'EZK', name:'యెహెజ్కేలు', chapters:48 },
+    { id:'DAN', name:'దానియేలు', chapters:12 },
+    { id:'HOS', name:'హోషేయ', chapters:14 },
+    { id:'JOL', name:'యోవేలు', chapters:3 },
+    { id:'AMO', name:'ఆమోసు', chapters:9 },
+    { id:'OBA', name:'ఓబద్యా', chapters:1 },
+    { id:'JON', name:'యోనా', chapters:4 },
+    { id:'MIC', name:'మీకా', chapters:7 },
+    { id:'NAM', name:'నాహూము', chapters:3 },
+    { id:'HAB', name:'హబక్కూకు', chapters:3 },
+    { id:'ZEP', name:'జెఫన్యా', chapters:3 },
+    { id:'HAG', name:'హగ్గయి', chapters:2 },
+    { id:'ZEC', name:'జెకర్యా', chapters:14 },
+    { id:'MAL', name:'మలాకీ', chapters:4 },
+  ],
+  nt: [
+    { id:'MAT', name:'మత్తయి', chapters:28 },
+    { id:'MRK', name:'మార్కు', chapters:16 },
+    { id:'LUK', name:'లూకా', chapters:24 },
+    { id:'JHN', name:'యోహాను', chapters:21 },
+    { id:'ACT', name:'అపొస్తలుల కార్యములు', chapters:28 },
+    { id:'ROM', name:'రోమీయులకు', chapters:16 },
+    { id:'1CO', name:'1 కొరింథీయులకు', chapters:16 },
+    { id:'2CO', name:'2 కొరింథీయులకు', chapters:13 },
+    { id:'GAL', name:'గలతీయులకు', chapters:6 },
+    { id:'EPH', name:'ఎఫెసీయులకు', chapters:6 },
+    { id:'PHP', name:'ఫిలిప్పీయులకు', chapters:4 },
+    { id:'COL', name:'కొలొస్సయులకు', chapters:4 },
+    { id:'1TH', name:'1 థెస్సలొనీకయులకు', chapters:5 },
+    { id:'2TH', name:'2 థెస్సలొనీకయులకు', chapters:3 },
+    { id:'1TI', name:'1 తిమోతికి', chapters:6 },
+    { id:'2TI', name:'2 తిమోతికి', chapters:4 },
+    { id:'TIT', name:'తీతుకి', chapters:3 },
+    { id:'PHM', name:'ఫిలేమోనుకు', chapters:1 },
+    { id:'HEB', name:'హెబ్రీయులకు', chapters:13 },
+    { id:'JAS', name:'యాకోబు', chapters:5 },
+    { id:'1PE', name:'1 పేతురు', chapters:5 },
+    { id:'2PE', name:'2 పేతురు', chapters:3 },
+    { id:'1JN', name:'1 యోహాను', chapters:5 },
+    { id:'2JN', name:'2 యోహాను', chapters:1 },
+    { id:'3JN', name:'3 యోహాను', chapters:1 },
+    { id:'JUD', name:'యూదా', chapters:1 },
+    { id:'REV', name:'ప్రకటన గ్రంథము', chapters:22 },
+  ]
+};
+
+// Flatten for lookup
+const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
+
+// Daily verse (rotates by day of year)
+const DAILY_VERSES = [
+  { ref:'యోహాను 3:16', text:'దేవుడు లోకమును ఎంతగానో ప్రేమించెను, తన అద్వితీయ కుమారునిగా పుట్టిన వాని యందు విశ్వాసముంచు ప్రతివాడును నశింపక నిత్యజీవము పొందునట్లు ఆయనను అనుగ్రహించెను.' },
+  { ref:'కీర్తనలు 23:1', text:'యెహోవా నా కాపరి; నాకు లేమి కలుగదు.' },
+  { ref:'యెషయా 40:31', text:'యెహోవా నిమిత్తము కనిపెట్టువారు క్రొత్తబలము పొందుదురు; గద్దలవలె రెక్కలెత్తి యెగురుదురు; పరుగెత్తినను అలయరు; నడచినను అలయరు.' },
+  { ref:'ఫిలిప్పీయులకు 4:13', text:'నన్ను బలపరచువాని ద్వారా నేను సమస్తమును చేయగలను.' },
+  { ref:'రోమీయులకు 8:28', text:'దేవుని ప్రేమించువారికి, అనగా ఆయన సంకల్పముచొప్పున పిలువబడినవారికి, సమస్తమును మేలుకే కలిసి జరుగుచున్నదని యెరుగుదుము.' },
+];
+
+// State
+let state = {
+  book: 'JHN',
+  chapter: 1,
+  activeTab: 'books',
+  bookmarks: JSON.parse(localStorage.getItem('te_bible_bm') || '[]'),
+  verses: [],
+  searchQuery: '',
+};
+
+// ── API ──────────────────────────────────────────────────────────────────────
+async function fetchVerses(bookId, chapter) {
+  try {
+    const url = `https://bible-api.com/${bookId}+${chapter}?translation=kjv`;
+    // We use a proxy-friendly free API and translate context via labels
+    // Primary: fetch from bible-api.com (English KJV as fallback)
+    // For Telugu we use getbible.net
+    const res = await fetch(`https://getbible.net/v2/tel/${bookId}/${chapter}.json`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    // getbible returns { book_nr, book_name, chapter, verses: {1:{verse:...},...} }
+    return Object.entries(data.verses).map(([num, v]) => ({
+      num: parseInt(num),
+      text: v.verse
+    }));
+  } catch(e) {
+    // fallback sample verses
+    return generateSampleVerses(bookId, chapter);
+  }
+}
+
+function generateSampleVerses(bookId, chapter) {
+  const samples = {
+    JHN: {
+      1: [
+        { num:1, text:'ఆదియందు వాక్యముండెను, వాక్యము దేవునియొద్ద ఉండెను, వాక్యము దేవుడై ఉండెను.' },
+        { num:2, text:'ఆయన ఆదియందు దేవునియొద్ద ఉండెను.' },
+        { num:3, text:'సమస్తమును ఆయన ద్వారా కలిగెను; కలిగినదేదియు ఆయన లేకుండా కలుగలేదు.' },
+        { num:4, text:'ఆయనయందు జీవముండెను; ఆ జీవము మనుష్యులకు వెలుగై ఉండెను.' },
+        { num:5, text:'ఆ వెలుగు చీకటిలో ప్రకాశించుచున్నది; చీకటి దానిని అందుకొనలేదు.' },
+        { num:14, text:'మరియు వాక్యము శరీరధారియై మన మధ్య నివసించెను; అది కృపాసత్యసంపూర్ణమై యుండెను; తండ్రివలన కలిగిన అద్వితీయకుమారుని మహిమవలె మేము దాని మహిమను చూచితిమి.' },
+      ]
+    }
+  };
+  if (samples[bookId] && samples[bookId][chapter]) return samples[bookId][chapter];
+  // Generic fallback
+  return Array.from({length:10}, (_,i) => ({
+    num: i+1,
+    text: `${getBookName(bookId)} ${chapter}:${i+1} — ఈ వాక్యభాగం లోడ్ అవుతోంది. దయచేసి internet connection తనిఖీ చేయండి.`
+  }));
+}
+
+function getBookName(id) {
+  return ALL_BOOKS.find(b => b.id === id)?.name || id;
+}
+
+function getBookChapters(id) {
+  return ALL_BOOKS.find(b => b.id === id)?.chapters || 1;
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function showTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['books','chapters','bookmarks'][i] === tab);
+  });
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const el = document.getElementById('sidebarContent');
+  if (state.activeTab === 'books') {
+    el.innerHTML = `
+      <div class="testament-label">పాత నిబంధన</div>
+      ${BOOKS.ot.map(b => `<button class="book-btn ${b.id===state.book?'active':''}" onclick="selectBook('${b.id}')">${b.name}</button>`).join('')}
+      <div class="testament-label">క్రొత్త నిబంధన</div>
+      ${BOOKS.nt.map(b => `<button class="book-btn ${b.id===state.book?'active':''}" onclick="selectBook('${b.id}')">${b.name}</button>`).join('')}
+    `;
+  } else if (state.activeTab === 'chapters') {
+    const total = getBookChapters(state.book);
+    el.innerHTML = `
+      <div class="testament-label">${getBookName(state.book)}</div>
+      <div class="chapter-grid">
+        ${Array.from({length:total},(_,i)=>`<button class="ch-btn ${i+1===state.chapter?'active':''}" onclick="selectChapter(${i+1})">${i+1}</button>`).join('')}
+      </div>
+    `;
+  } else {
+    if (state.bookmarks.length === 0) {
+      el.innerHTML = `<div class="empty-state">ఇంకా బుక్‌మార్క్స్ లేవు.<br/>వాక్యంపై ★ నొక్కి సేవ్ చేయండి.</div>`;
+    } else {
+      el.innerHTML = state.bookmarks.map((bm,i) => `
+        <div class="bookmark-item">
+          <div class="bookmark-ref">${bm.ref} <button class="action-btn" onclick="removeBookmark(${i})" title="తొలగించు">✕</button></div>
+          <div class="bookmark-text">${bm.text}</div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+async function renderReader() {
+  const reader = document.getElementById('reader');
+  const book = getBookName(state.book);
+  const total = getBookChapters(state.book);
+
+  const daily = DAILY_VERSES[new Date().getDay() % DAILY_VERSES.length];
+
+  reader.innerHTML = `
+    <div class="daily-verse-banner">
+      <div class="daily-label">✦ నేటి వాక్యం</div>
+      <div class="daily-text">${daily.text}</div>
+      <div class="daily-ref">— ${daily.ref}</div>
+    </div>
+    <div class="reader-header">
+      <h1>${book} ${state.chapter}</h1>
+      <p>${book} · అధ్యాయం ${state.chapter} / ${total}</p>
+    </div>
+    <div class="chapter-nav">
+      <button class="nav-btn" onclick="prevChapter()" ${state.chapter<=1?'disabled':''}>← ముందు</button>
+      <button class="nav-btn" onclick="nextChapter()" ${state.chapter>=total?'disabled':''}>తర్వాత →</button>
+    </div>
+    <div class="loading" id="versesLoading">
+      <div class="spinner"></div>
+      <span>వాక్యాలు లోడ్ అవుతున్నాయి...</span>
+    </div>
+    <div class="verse-list" id="verseList" style="display:none"></div>
+  `;
+
+  const verses = await fetchVerses(state.book, state.chapter);
+  state.verses = verses;
+
+  document.getElementById('versesLoading').style.display = 'none';
+  const vl = document.getElementById('verseList');
+  vl.style.display = 'flex';
+
+  vl.innerHTML = verses.map(v => {
+    const bmKey = `${state.book}-${state.chapter}-${v.num}`;
+    const isBm = state.bookmarks.some(b => b.key === bmKey);
+    return `
+      <div class="verse ${isBm?'bookmarked':''}" id="v${v.num}">
+        <span class="verse-num">${v.num}</span>
+        <span class="verse-text">${v.text}</span>
+        <span class="verse-actions">
+          <button class="action-btn" onclick="toggleBookmark('${bmKey}',${v.num})" title="బుక్‌మార్క్">${isBm?'★':'☆'}</button>
+          <button class="action-btn" onclick="copyVerse(${v.num})" title="కాపీ">⎘</button>
+        </span>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectBook(id) {
+  state.book = id;
+  state.chapter = 1;
+  renderSidebar();
+  renderReader();
+  showTab('books');
+}
+
+function selectChapter(ch) {
+  state.chapter = ch;
+  renderSidebar();
+  renderReader();
+}
+
+function prevChapter() {
+  if (state.chapter > 1) { state.chapter--; renderReader(); renderSidebar(); }
+}
+
+function nextChapter() {
+  if (state.chapter < getBookChapters(state.book)) { state.chapter++; renderReader(); renderSidebar(); }
+}
+
+function toggleBookmark(key, num) {
+  const v = state.verses.find(x => x.num === num);
+  const idx = state.bookmarks.findIndex(b => b.key === key);
+  if (idx > -1) {
+    state.bookmarks.splice(idx, 1);
+    showToast('బుక్‌మార్క్ తొలగించబడింది');
+  } else {
+    state.bookmarks.push({
+      key, ref:`${getBookName(state.book)} ${state.chapter}:${num}`, text: v?.text || ''
+    });
+    showToast('బుక్‌మార్క్ సేవ్ అయింది ★');
+  }
+  localStorage.setItem('te_bible_bm', JSON.stringify(state.bookmarks));
+  renderReader();
+  if (state.activeTab === 'bookmarks') renderSidebar();
+}
+
+function removeBookmark(i) {
+  state.bookmarks.splice(i, 1);
+  localStorage.setItem('te_bible_bm', JSON.stringify(state.bookmarks));
+  renderSidebar();
+}
+
+function copyVerse(num) {
+  const v = state.verses.find(x => x.num === num);
+  if (!v) return;
+  navigator.clipboard.writeText(`${getBookName(state.book)} ${state.chapter}:${num} — ${v.text}`)
+    .then(() => showToast('వాక్యం కాపీ అయింది!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Search ───────────────────────────────────────────────────────────────────
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  const q = e.target.value.trim();
+  state.searchQuery = q;
+  if (!q) { renderReader(); return; }
+  searchTimeout = setTimeout(() => doSearch(q), 500);
+});
+
+function doSearch(query) {
+  const reader = document.getElementById('reader');
+  // Search within loaded verses first; otherwise show prompt
+  const results = state.verses
+    .filter(v => v.text.includes(query))
+    .map(v => ({ ref:`${getBookName(state.book)} ${state.chapter}:${v.num}`, text:v.text, key:`${state.book}-${state.chapter}-${v.num}` }));
+
+  if (results.length === 0) {
+    reader.innerHTML = `
+      <div class="reader-header"><h1>వెతకడం: "${query}"</h1><p>ప్రస్తుత అధ్యాయంలో ఫలితాలు దొరకలేదు.</p></div>
+      <div class="empty-state" style="margin-top:40px">వేరే పుస్తకాన్ని తెరిచి వెతకండి.</div>
+    `;
+    return;
+  }
+
+  reader.innerHTML = `
+    <div class="reader-header"><h1>వెతకడం: "${query}"</h1><p>${results.length} ఫలితాలు దొరికాయి</p></div>
+    <div class="search-results">
+      ${results.map(r => `
+        <div class="search-result-item" onclick="clearSearch()">
+          <div class="sr-ref">${r.ref}</div>
+          <div class="sr-text">${r.text.replace(new RegExp(query,'g'), m => `<mark>${m}</mark>`)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  state.searchQuery = '';
+  renderReader();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+renderSidebar();
+renderReader();
+</script>
+</body>
+</html>
